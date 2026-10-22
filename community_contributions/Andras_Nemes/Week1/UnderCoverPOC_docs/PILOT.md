@@ -26,6 +26,34 @@ I built the Week 1 Day 3 pilot for UnderCover Travel Insurance with Claude Code,
 
 **What I did not do.** I did not open `data/evals/`, so I have not scored the agent against the handlers' decisions. The agent ignores the claims manual, as the spec says for the pilot. There is no sign-in, no real payments and no messages to customers.
 
+## The UI in action
+
+These screenshots come from a second live run with the real model, on fourteen claims of the 25 in the queue, started from the dashboard. The names and data are the fictional records in `data/`.
+
+**The queue.** Every claim with its state and the agent's decision. Eleven are still waiting, three approvals over $1,000.00 are waiting for sign-off, and the rest are decided, including a few declines.
+
+![The claims queue after the agent worked fourteen claims](images/queue.png)
+
+**The agent at work.** A claim in progress, with the agent's steps appearing as it reads the claim and the policy wording.
+
+![A claim in progress with the agent's steps](images/agent-working.png)
+
+**A decision.** The agent partly approved this baggage claim at $580.00. Its reason shows the arithmetic, and the page names the sections of the policy wording it relied on.
+
+![A decided claim with the agent's reason and policy sections](images/decision.png)
+
+**Waiting for sign-off.** The agent approved $3,750.00, which is over the $1,000.00 limit. The payment is blocked until a handler picks their name and signs off.
+
+![An approval over the limit waiting for a handler's sign-off](images/sign-off.png)
+
+**The agent's instructions**, read only, as the spec asks.
+
+![The agent's instructions](images/instructions.png)
+
+**Dark mode**, in the UnderCover brand.
+
+![The claims queue in dark mode](images/queue-dark.png)
+
 ## My takeaways
 
 ### The way of working
