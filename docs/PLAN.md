@@ -87,18 +87,18 @@ Builds the write side and the rules. Why before the agent: the rules must hold w
 
 Success criteria
 
-- [ ] `uv run pytest -q backend` passes with at least 80% coverage.
-- [ ] Decide CLM-1001 as an approval of $420.00, then pay $420.00: both return 200, and `GET /api/claims/CLM-1001` shows status `decided`.
-- [ ] Decide a claim as an approval of $1,250.00: its status is `awaiting_sign_off`. `POST payment` with $1,250.00 returns 409, the claim stays `awaiting_sign_off` and no payment row exists (test, this is the spec's key rule).
-- [ ] Approval of exactly $1,000.00 can be paid with no sign-off; $1,000.01 cannot.
-- [ ] `POST sign-off` with a valid handler on that claim returns 200, records the handler and one payment of $1,250.00, and the status becomes `decided`. A second sign-off or a second payment returns 409.
-- [ ] `POST sign-off` on a claim that is not awaiting sign-off returns 409; with an unknown handler returns 404.
-- [ ] Paying a claim with no decision, a declined or a referred claim returns 409; paying an amount different from the approved payout returns 409.
-- [ ] A second decision on the same claim returns 409; an approval with payout 0, or a decline with a payout above 0, returns 422.
-- [ ] A decline and a referral each become `decided` immediately and cannot be paid.
-- [ ] Events are returned in the order they were added, each with `kind`, `text` and a timestamp.
-- [ ] `npm run check:python` passes.
-- [ ] Committed; `docs/PLAN.md` ticked and `docs/STATUS.md` updated.
+- [x] `uv run pytest -q backend` passes with at least 80% coverage.
+- [x] Decide CLM-1001 as an approval of $420.00, then pay $420.00: both return 200, and `GET /api/claims/CLM-1001` shows status `decided`.
+- [x] Decide a claim as an approval of $1,250.00: its status is `awaiting_sign_off`. `POST payment` with $1,250.00 returns 409, the claim stays `awaiting_sign_off` and no payment row exists (test, this is the spec's key rule).
+- [x] Approval of exactly $1,000.00 can be paid with no sign-off; $1,000.01 cannot.
+- [x] `POST sign-off` with a valid handler on that claim returns 200, records the handler and one payment of $1,250.00, and the status becomes `decided`. A second sign-off or a second payment returns 409.
+- [x] `POST sign-off` on a claim that is not awaiting sign-off returns 409; with an unknown handler returns 404.
+- [x] Paying a claim with no decision, a declined or a referred claim returns 409; paying an amount different from the approved payout returns 409.
+- [x] A second decision on the same claim returns 409; an approval with payout 0, or a decline with a payout above 0, returns 422.
+- [x] A decline and a referral each become `decided` immediately and cannot be paid.
+- [x] Events are returned in the order they were added, each with `kind`, `text` and a timestamp.
+- [x] `npm run check:python` passes.
+- [x] Committed; `docs/PLAN.md` ticked and `docs/STATUS.md` updated.
 
 ## Phase 3: The UnderCover Agent and the runner
 

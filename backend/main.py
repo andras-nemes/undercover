@@ -8,9 +8,20 @@ from typing import Annotated
 from fastapi import Depends, FastAPI
 from fastapi.responses import PlainTextResponse
 
-from backend import claims
+from backend import claims, rules
 from backend.db import DATA, ROOT, get_db, init_db
-from backend.models import ClaimDetail, ClaimSummary, Handler
+from backend.models import (
+    ClaimDetail,
+    ClaimSummary,
+    Decision,
+    Event,
+    Handler,
+    NewDecision,
+    NewEvent,
+    NewPayment,
+    NewSignOff,
+    Payment,
+)
 
 Db = Annotated[sqlite3.Connection, Depends(get_db)]
 
@@ -67,3 +78,34 @@ def get_instructions() -> str:
 def list_handlers(db: Db) -> list[Handler]:
     """List the claims handlers."""
     return claims.list_handlers(db)
+
+
+@app.get("/api/claims/{claim_id}/events", operation_id="list_events")
+def list_events(claim_id: str, db: Db) -> list[Event]:
+    """List the agent's steps on a claim, oldest first."""
+    return rules.list_events(db, claim_id)
+
+
+@app.post("/api/claims/{claim_id}/events", operation_id="add_event")
+def add_event(claim_id: str, body: NewEvent, db: Db) -> Event:
+    """Record one step of the agent's work on a claim."""
+    return rules.add_event(db, claim_id, body.kind, body.text)
+
+
+@app.post("/api/claims/{claim_id}/decision", operation_id="decide_claim")
+def decide_claim(claim_id: str, body: NewDecision, db: Db) -> Decision:
+    """Record the decision on a claim: approve, decline or refer."""
+    return rules.decide(db, claim_id, body)
+
+
+@app.post("/api/claims/{claim_id}/payment", operation_id="pay_claim")
+def pay_claim(claim_id: str, body: NewPayment, db: Db) -> Payment:
+    """Pay an approved claim the amount given, once any sign-off it needs is done."""
+    return rules.pay(db, claim_id, body.amount)
+
+
+@app.post("/api/claims/{claim_id}/sign-off", operation_id="sign_off_claim")
+def sign_off_claim(claim_id: str, body: NewSignOff, db: Db) -> ClaimDetail:
+    """Sign off an approval over the limit as a handler and release its payment."""
+    rules.sign_off(db, claim_id, body.handler_id)
+    return claims.get_detail(db, claim_id)
