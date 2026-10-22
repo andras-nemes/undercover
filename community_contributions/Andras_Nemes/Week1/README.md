@@ -25,5 +25,3 @@ The documents for the pilot build are in [`UnderCoverPOC_docs/`](UnderCoverPOC_d
 - [`PILOT.md`](UnderCoverPOC_docs/PILOT.md): what I did and my takeaways. **It includes screenshots of the pilot's UI in action**: the queue, the agent working on a claim, a decision with its reasons, an approval waiting for a handler's sign-off, the agent's instructions, and dark mode. The image files are in [`UnderCoverPOC_docs/images/`](UnderCoverPOC_docs/images/).
 - [`PLAN.md`](UnderCoverPOC_docs/PLAN.md): the plan for the pilot, with every success criterion ticked.
 - [`STATUS.md`](UnderCoverPOC_docs/STATUS.md): what is built and how to run it.
-
-The pilot code itself is in `backend/`, `agent/`, `dashboard/` and `e2e/` at the root of the repo.
