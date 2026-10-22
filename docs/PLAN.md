@@ -111,17 +111,17 @@ Replaces the hello-world agent with the claims agent, and lets the backend start
 
 Success criteria
 
-- [ ] `uv run pytest -q` passes with at least 80% coverage; no test calls a model.
-- [ ] With a stub model scripted to call `get_claim`, `get_policy_wording`, `decide_claim` (approve $420.00) and `pay_claim`, `run("CLM-1001", ...)` leaves the claim `decided`, with the decision, reason and policy section stored.
-- [ ] With a stub that approves $1,250.00 and then tries `pay_claim`, the tool returns the 409 as an error message to the model, the claim is `awaiting_sign_off` and nothing was paid.
-- [ ] The run posts events in order: started, one tool call and one tool result per tool, finished. `GET /api/claims/{id}/events` shows them.
-- [ ] The system prompt used by the agent is exactly what `GET /api/instructions` returns (test).
-- [ ] `POST /api/claims/CLM-1001/run` with a stub agent returns immediately with status `in_progress`; after the background task finishes the claim has a decision. Running a claim that is not `waiting` returns 409.
-- [ ] A stub agent that raises leaves the claim `waiting` with an `error` event.
-- [ ] `POST /api/run-waiting` with a stub agent decides every waiting claim, one at a time.
-- [ ] `agent/` contains no import of `backend` outside of tests, and no tool reads a file from `data/` (test or grep).
-- [ ] `npm run check:python` passes.
-- [ ] Committed; `docs/PLAN.md` ticked and `docs/STATUS.md` updated.
+- [x] `uv run pytest -q` passes with at least 80% coverage; no test calls a model.
+- [x] With a stub model scripted to call `get_claim`, `get_policy_wording`, `decide_claim` (approve $420.00) and `pay_claim`, `run("CLM-1001", ...)` leaves the claim `decided`, with the decision, reason and policy section stored.
+- [x] With a stub that approves $1,250.00 and then tries `pay_claim`, the tool returns the 409 as an error message to the model, the claim is `awaiting_sign_off` and nothing was paid.
+- [x] The run posts events in order: started, one tool call and one tool result per tool, finished. `GET /api/claims/{id}/events` shows them.
+- [x] The system prompt used by the agent is exactly what `GET /api/instructions` returns (test).
+- [x] `POST /api/claims/CLM-1001/run` with a stub agent returns immediately with status `in_progress`; after the background task finishes the claim has a decision. Running a claim that is not `waiting` returns 409.
+- [x] A stub agent that raises leaves the claim `waiting` with an `error` event.
+- [x] `POST /api/run-waiting` with a stub agent decides every waiting claim, one at a time.
+- [x] `agent/` contains no import of `backend` outside of tests, and no tool reads a file from `data/` (test or grep).
+- [x] `npm run check:python` passes.
+- [x] Committed; `docs/PLAN.md` ticked and `docs/STATUS.md` updated.
 
 ## Phase 4: Dashboard, the queue and the instructions
 

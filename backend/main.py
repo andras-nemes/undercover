@@ -5,10 +5,10 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from typing import Annotated
 
-from fastapi import Depends, FastAPI
+from fastapi import BackgroundTasks, Depends, FastAPI
 from fastapi.responses import PlainTextResponse
 
-from backend import claims, rules
+from backend import claims, rules, runner
 from backend.db import DATA, ROOT, get_db, init_db
 from backend.models import (
     ClaimDetail,
@@ -109,3 +109,20 @@ def sign_off_claim(claim_id: str, body: NewSignOff, db: Db) -> ClaimDetail:
     """Sign off an approval over the limit as a handler and release its payment."""
     rules.sign_off(db, claim_id, body.handler_id)
     return claims.get_detail(db, claim_id)
+
+
+@app.post("/api/claims/{claim_id}/run", operation_id="run_agent")
+def run_agent(claim_id: str, background: BackgroundTasks, db: Db) -> ClaimDetail:
+    """Start the agent on a waiting claim."""
+    rules.get_status(db, claim_id)
+    runner.start(claim_id)
+    background.add_task(runner.work, claim_id)
+    return claims.get_detail(db, claim_id)
+
+
+@app.post("/api/run-waiting", operation_id="run_waiting_claims")
+def run_waiting_claims(background: BackgroundTasks, db: Db) -> list[ClaimSummary]:
+    """Start the agent on every waiting claim, one after another."""
+    waiting = [c for c in claims.list_summaries(db) if c.status == "waiting"]
+    background.add_task(runner.work_waiting, [c.claim_id for c in waiting])
+    return waiting
