@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { getJson } from "./api";
 
 const REFRESH_MS = 2000;
@@ -11,6 +11,9 @@ export function useApi<T>(
   const [data, setData] = useState<T | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [round, setRound] = useState(0);
+  const reload = useCallback(() => {
+    setRound((n) => n + 1);
+  }, []);
 
   useEffect(() => {
     let live = true;
@@ -20,11 +23,7 @@ export function useApi<T>(
         if (!live) return;
         setData(value);
         setError(null);
-        if (keepFresh(value)) {
-          timer = window.setTimeout(() => {
-            setRound((n) => n + 1);
-          }, REFRESH_MS);
-        }
+        if (keepFresh(value)) timer = window.setTimeout(reload, REFRESH_MS);
       })
       .catch((failure: unknown) => {
         if (live) setError(String(failure));
@@ -33,13 +32,7 @@ export function useApi<T>(
       live = false;
       window.clearTimeout(timer);
     };
-  }, [path, round, keepFresh]);
+  }, [path, round, keepFresh, reload]);
 
-  return {
-    data,
-    error,
-    reload: () => {
-      setRound((n) => n + 1);
-    },
-  };
+  return { data, error, reload };
 }

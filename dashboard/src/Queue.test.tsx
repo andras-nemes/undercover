@@ -1,4 +1,10 @@
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 import type { ClaimSummary } from "./api";
 import { Queue } from "./Queue";
@@ -86,4 +92,47 @@ it("says when the queue cannot be loaded", async () => {
   vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("offline")));
   render(<Queue />);
   expect(await screen.findByRole("alert")).toBeDefined();
+});
+
+it("runs every waiting claim and keeps refreshing", async () => {
+  vi.useFakeTimers({ shouldAdvanceTime: true });
+  let current = [claim({}), claim({ claim_id: "CLM-1002" })];
+  const mock = vi.fn((_path: string, init?: RequestInit) =>
+    Promise.resolve(
+      init?.method === "POST" ? Response.json([]) : Response.json(current),
+    ),
+  );
+  vi.stubGlobal("fetch", mock);
+  render(<Queue />);
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Run all waiting" }),
+  );
+  await waitFor(() => {
+    expect(mock).toHaveBeenCalledWith("/api/run-waiting", expect.anything());
+  });
+  current = current.map((c) => ({ ...c, status: "decided" as const }));
+  await vi.advanceTimersByTimeAsync(2500);
+  await waitFor(() => {
+    expect(screen.getAllByText("Decided", { selector: ".chip" })).toHaveLength(
+      2,
+    );
+  });
+  expect(screen.queryByRole("button", { name: "Run all waiting" })).toBeNull();
+  vi.useRealTimers();
+});
+
+it("shows why the queue could not be run", async () => {
+  const mock = vi.fn((_path: string, init?: RequestInit) =>
+    Promise.resolve(
+      init?.method === "POST"
+        ? Response.json({ detail: "No." }, { status: 500 })
+        : Response.json([claim({})]),
+    ),
+  );
+  vi.stubGlobal("fetch", mock);
+  render(<Queue />);
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Run all waiting" }),
+  );
+  expect(await screen.findByText(/No\./)).toBeDefined();
 });

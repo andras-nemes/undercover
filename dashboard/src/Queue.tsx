@@ -1,5 +1,5 @@
-import { useState } from "react";
-import type { ClaimSummary, Status } from "./api";
+import { useEffect, useState } from "react";
+import { post, type ClaimSummary, type Status } from "./api";
 import { OUTCOME_LABELS, STATUS_LABELS, label, money } from "./format";
 import { useApi } from "./useApi";
 
@@ -22,11 +22,39 @@ function decisionText(claim: ClaimSummary): string {
 }
 
 export function Queue() {
-  const { data: claims, error } = useApi<ClaimSummary[]>(
-    "/api/claims",
-    anyInProgress,
-  );
+  const {
+    data: claims,
+    error,
+    reload,
+  } = useApi<ClaimSummary[]>("/api/claims", anyInProgress);
   const [filter, setFilter] = useState<Status | "all">("all");
+  const [running, setRunning] = useState(false);
+  const [runError, setRunError] = useState<string | null>(null);
+  const active =
+    running &&
+    (claims?.some(
+      (c) => c.status === "waiting" || c.status === "in_progress",
+    ) ??
+      false);
+
+  useEffect(() => {
+    if (!active) return;
+    const timer = window.setInterval(reload, 2000);
+    return () => {
+      window.clearInterval(timer);
+    };
+  }, [active, reload]);
+
+  const runAll = () => {
+    post("/api/run-waiting")
+      .then(() => {
+        setRunning(true);
+        reload();
+      })
+      .catch((failure: unknown) => {
+        setRunError(String(failure));
+      });
+  };
 
   if (error) return <p role="alert">The queue could not be loaded.</p>;
   if (!claims) return <p>Loading the queue</p>;
@@ -60,7 +88,13 @@ export function Queue() {
             <span className="mono">{count(status)}</span>
           </button>
         ))}
+        {count("waiting") > 0 && (
+          <button className="primary" onClick={runAll}>
+            Run all waiting
+          </button>
+        )}
       </div>
+      {runError && <p role="alert">{runError}</p>}
       <section className="panel table-panel">
         <table>
           <thead>

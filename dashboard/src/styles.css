@@ -263,3 +263,115 @@ tbody tr:hover {
 .prose h3:first-child {
   margin-top: 0;
 }
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.claim-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+@media (min-width: 900px) {
+  .claim-grid {
+    grid-template-columns: 2fr 3fr;
+  }
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.stack table td,
+.stack table th {
+  white-space: normal;
+  padding: 6px 8px;
+}
+
+.outcome {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin: 0 0 8px;
+}
+
+.sign-off {
+  background: var(--hover);
+  border-radius: 12px;
+  padding: 12px 16px;
+}
+
+.sign-off p {
+  margin: 0 0 8px;
+}
+
+select {
+  font: inherit;
+  color: var(--ink);
+  background: var(--panel);
+  border: 0;
+  border-radius: 8px;
+  padding: 6px 8px;
+}
+
+.document p {
+  margin: 0 0 8px;
+}
+
+.document h3 {
+  margin-top: 12px;
+}
+
+.steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.steps li {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0 12px;
+  background: var(--hover);
+  border-radius: 12px;
+  padding: 8px 12px;
+}
+
+.steps li.failed .step-kind {
+  color: var(--alert);
+}
+
+.step-kind {
+  font-weight: 600;
+}
+
+.step-time {
+  color: var(--muted);
+  text-align: right;
+}
+
+.step-text {
+  grid-column: 1 / -1;
+  overflow-wrap: anywhere;
+  font-size: 0.92rem;
+}
+
+[role="alert"] {
+  color: var(--alert);
+}
+
+h1 .mono {
+  color: var(--muted);
+}

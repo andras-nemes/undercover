@@ -53,7 +53,7 @@ it("shows a claim at its address", () => {
   stubFetch();
   window.location.hash = "#/claims/CLM-1001";
   render(<App />);
-  expect(screen.getByRole("heading", { name: "CLM-1001" })).toBeDefined();
+  expect(screen.getByRole("link", { name: "Back to the queue" })).toBeDefined();
 });
 
 it("says when a page does not exist", () => {

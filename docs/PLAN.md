@@ -159,14 +159,14 @@ Builds the page that makes the pilot usable: the full claim, the decision, the l
 
 Success criteria
 
-- [ ] `npm run check:ts` passes with at least 80% coverage.
-- [ ] Vitest: the claim page renders each section from mocked data; the steps panel polls while in progress and stops afterward; "Run agent" posts to the right route; the sign-off button posts the chosen handler; the sign-off controls appear only in `awaiting_sign_off`.
-- [ ] Playwright e2e, setting state through the API with the test request fixture (no model): a claim approved at $420.00 and paid shows the state "Decided", the payout `$420.00`, the reason and the policy section.
-- [ ] Playwright e2e: a claim approved at $1,250.00 shows "Waiting for sign-off"; the payment attempt through the API returns 409 and the page still says "Waiting for sign-off"; choosing a handler and clicking "Sign off and pay" changes the page to "Decided" with the handler's name and `$1,250.00`.
-- [ ] Playwright e2e: events posted through the API appear on the claim page in order.
-- [ ] Playwright MCP against `npm run dev`: open `CLM-1001`, check the layout in light and dark mode at desktop and phone width, and that the console is clean.
-- [ ] `npm run check:ts` and `npm run e2e` pass.
-- [ ] Committed; `docs/PLAN.md` ticked and `docs/STATUS.md` updated.
+- [x] `npm run check:ts` passes with at least 80% coverage.
+- [x] Vitest: the claim page renders each section from mocked data; the steps panel polls while in progress and stops afterward; "Run agent" posts to the right route; the sign-off button posts the chosen handler; the sign-off controls appear only in `awaiting_sign_off`.
+- [x] Playwright e2e, setting state through the API with the test request fixture (no model): a claim approved at $420.00 and paid shows the state "Decided", the payout `$420.00`, the reason and the policy section.
+- [x] Playwright e2e: a claim approved at $1,250.00 shows "Waiting for sign-off"; the payment attempt through the API returns 409 and the page still says "Waiting for sign-off"; choosing a handler and clicking "Sign off and pay" changes the page to "Decided" with the handler's name and `$1,250.00`.
+- [x] Playwright e2e: events posted through the API appear on the claim page in order.
+- [x] Playwright MCP against `npm run dev`: open `CLM-1001`, check the layout in light and dark mode at desktop and phone width, and that the console is clean.
+- [x] `npm run check:ts` and `npm run e2e` pass.
+- [x] Committed; `docs/PLAN.md` ticked and `docs/STATUS.md` updated.
 
 ## Phase 6: A real run, documentation and the final check
 
