@@ -178,11 +178,11 @@ Proves the whole chain with a real model, then tidies the documentation.
 
 Success criteria
 
-- [ ] With the key in `.env` and `npm run dev` running, click "Run agent" on three claims of different types in the dashboard, using Playwright MCP: each moves from Waiting to In progress to a final state, the steps appear while it works, and each has a decision, reasons and a policy section.
-- [ ] If the agent approves any claim over $1,000.00 in these runs, it shows "Waiting for sign-off" with nothing paid until a handler signs off in the dashboard.
-- [ ] `docs/STATUS.md` lists what is built, how to run it, how to reset the queue, and what is not built yet.
-- [ ] `npm run check` passes in full (ruff, pyright, pytest with coverage, ESLint, Prettier, tsc, vitest with coverage, Playwright). I will report the results.
-- [ ] `git status` is clean of uncommitted changes from this build; nothing was pushed.
+- [x] With the key in `.env` and `npm run dev` running, click "Run agent" on three claims of different types in the dashboard, using Playwright MCP: each moves from Waiting to In progress to a final state, the steps appear while it works, and each has a decision, reasons and a policy section.
+- [x] If the agent approves any claim over $1,000.00 in these runs, it shows "Waiting for sign-off" with nothing paid until a handler signs off in the dashboard.
+- [x] `docs/STATUS.md` lists what is built, how to run it, how to reset the queue, and what is not built yet.
+- [x] `npm run check` passes in full (ruff, pyright, pytest with coverage, ESLint, Prettier, tsc, vitest with coverage, Playwright). I will report the results.
+- [x] `git status` is clean of uncommitted changes from this build; nothing was pushed.
 
 ---
 

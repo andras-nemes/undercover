@@ -1,6 +1,6 @@
 # Status
 
-The pilot is being built in phases (see `docs/PLAN.md`).
+The pilot is built (see `docs/PLAN.md`): a backend that holds the claims queue and enforces the rules, the UnderCover Agent that decides claims, and a dashboard for the handlers.
 
 ## Built
 
@@ -15,3 +15,15 @@ The pilot is being built in phases (see `docs/PLAN.md`).
 ## Run it
 
 `uv sync` and `npm install`, then `npm run dev` (backend on port 8000, dashboard on 5173). Delete `backend/undercover.db` to reset the queue. `npm run check` runs every check.
+
+## How a claim moves
+
+1. Open a waiting claim in the dashboard and click "Run agent" (or "Run all waiting" on the queue). The agent needs `OPENROUTER_API_KEY` in `.env`; set `MODEL_NAME` (for example `openrouter/free`) to use another model.
+2. The agent reads the claim and the policy wording, records its decision and, if it approved $1,000.00 or less, pays it. The claim is then decided.
+3. An approval over $1,000.00 waits for sign-off. The backend refuses the payment, even if the agent tries to pay. A handler picks their name on the claim page and clicks "Sign off and pay".
+
+A live run on three claims worked end to end: a trip delay approved and paid, a baggage delay approved and paid, and an emergency medical approval of $3,750.00 that the agent tried to pay, was refused with a 409, and left waiting until a handler signed off in the dashboard.
+
+## Not built
+
+The claims manual, sign-in, real payments, messages to customers, and any scoring of the agent against the handlers' decisions (`data/evals/` has not been opened).
