@@ -138,14 +138,14 @@ Builds the app shell, the brand and the first two views. Why before the claim pa
 
 Success criteria
 
-- [ ] `npm run check:ts` passes: Prettier, ESLint, `tsc` in strict mode, and vitest with at least 80% coverage.
-- [ ] Vitest: the queue renders rows and state chips from a mocked `fetch`; the filter narrows the rows; the instructions page renders the text; the router picks the right view.
-- [ ] `grep -rn "any" dashboard/src` finds no TypeScript `any` type.
-- [ ] Playwright e2e: the queue shows 25 claims, all in the "Waiting" state; the instructions page shows the text from `GET /api/instructions`.
-- [ ] Playwright MCP, `npm run dev` running: screenshots of the queue and the instructions page in light and dark mode show the brand fonts, the page backgrounds `#F0F4F5` and `#04232E`, readable chip text, and no outlined panels.
-- [ ] Browser console shows no errors on either page.
-- [ ] `npm run check:ts` and `npm run e2e` pass.
-- [ ] Committed; `docs/PLAN.md` ticked and `docs/STATUS.md` updated.
+- [x] `npm run check:ts` passes: Prettier, ESLint, `tsc` in strict mode, and vitest with at least 80% coverage.
+- [x] Vitest: the queue renders rows and state chips from a mocked `fetch`; the filter narrows the rows; the instructions page renders the text; the router picks the right view.
+- [x] `grep -rn "any" dashboard/src` finds no TypeScript `any` type.
+- [x] Playwright e2e: the queue shows 25 claims, all in the "Waiting" state; the instructions page shows the text from `GET /api/instructions`.
+- [x] Playwright MCP, `npm run dev` running: screenshots of the queue and the instructions page in light and dark mode show the brand fonts, the page backgrounds `#F0F4F5` and `#04232E`, readable chip text, and no outlined panels.
+- [x] Browser console shows no errors on either page.
+- [x] `npm run check:ts` and `npm run e2e` pass.
+- [x] Committed; `docs/PLAN.md` ticked and `docs/STATUS.md` updated.
 
 ## Phase 5: Dashboard, the claim page
 
