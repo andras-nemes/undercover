@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm -v)",
+      "Bash(uv --version)",
+      "Bash(where uv *)",
+      "Bash(winget list *)",
+      "Bash(uv self *)"
+    ]
+  }
+}
