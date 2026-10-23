@@ -46,7 +46,7 @@ export function Queue() {
   }, [active, reload]);
 
   const runAll = () => {
-    post("/api/run-waiting")
+    post("/api/runs", { limit: 0 })
       .then(() => {
         setRunning(true);
         reload();

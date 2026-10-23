@@ -132,19 +132,19 @@ Builds the rules that make a long run safe, with plain API calls and no agent. W
 
 Success criteria
 
-- [ ] `uv run pytest -q backend` passes with at least 80% coverage; no test calls a model.
-- [ ] `POST /api/runs` with `{"limit": 5}` returns a `running` run with limit 5; a second `POST /api/runs` returns 409 while it runs.
-- [ ] To-do list stored: `PUT /api/runs/{id}/todos` with items in all four statuses; `GET /api/runs/latest` returns the same items in the same order. A second `PUT` replaces the list. An unknown status returns 422.
-- [ ] Cap: with a limit of 2, `start_claim` succeeds for two different claims and returns 409 for a third; the other 23 claims are still `waiting`. `list_queue` then returns no new claims.
-- [ ] A failed claim does not stop the run: after `release_claim` on a claim left `in_progress`, `start_claim` on another claim still succeeds.
-- [ ] A failed claim goes back in the queue: after the first `release_claim` the claim is `waiting`, has an `error` event and a failure count of 1, and it is in `list_queue` even when the cap has been reached. Starting it again does not use up the cap.
-- [ ] A claim that fails twice is left for a handler: after the second `release_claim` its state is `needs_handler`, it is not in `list_queue`, and `start_claim` on it returns 409.
-- [ ] Nothing decided or paid twice: a claim that was approved ($420.00) and then released as failed goes back to `waiting`; deciding it again returns 409, paying it once succeeds and paying it again returns 409 (test).
-- [ ] `release_claim` on a claim that is `decided` or `awaiting_sign_off` changes nothing and counts no failure.
-- [ ] The check for missed claims: `finish_run` returns 409 and names the claims while there is a waiting claim the run took (a retry) or, under the cap, a waiting claim it has not taken. It returns 200 and stores the summary once nothing is owed, including when the cap is reached with claims left waiting. The run is then `finished`.
-- [ ] The runner (stub queue agent): a run whose agent raises is marked `failed` with the reason and leaves no claim `in_progress`. A single-claim run follows the same failure rules (first failure: `waiting`; second: `needs_handler`).
-- [ ] `npm run check:python` passes.
-- [ ] Committed; this plan ticked and `docs/STATUS.md` updated.
+- [x] `uv run pytest -q backend` passes with at least 80% coverage; no test calls a model.
+- [x] `POST /api/runs` with `{"limit": 5}` returns a `running` run with limit 5; a second `POST /api/runs` returns 409 while it runs.
+- [x] To-do list stored: `PUT /api/runs/{id}/todos` with items in all four statuses; `GET /api/runs/latest` returns the same items in the same order. A second `PUT` replaces the list. An unknown status returns 422.
+- [x] Cap: with a limit of 2, `start_claim` succeeds for two different claims and returns 409 for a third; the other 23 claims are still `waiting`. `list_queue` then returns no new claims.
+- [x] A failed claim does not stop the run: after `release_claim` on a claim left `in_progress`, `start_claim` on another claim still succeeds.
+- [x] A failed claim goes back in the queue: after the first `release_claim` the claim is `waiting`, has an `error` event and a failure count of 1, and it is in `list_queue` even when the cap has been reached. Starting it again does not use up the cap.
+- [x] A claim that fails twice is left for a handler: after the second `release_claim` its state is `needs_handler`, it is not in `list_queue`, and `start_claim` on it returns 409.
+- [x] Nothing decided or paid twice: a claim that was approved ($420.00) and then released as failed goes back to `waiting`; deciding it again returns 409, paying it once succeeds and paying it again returns 409 (test).
+- [x] `release_claim` on a claim that is `decided` or `awaiting_sign_off` changes nothing and counts no failure.
+- [x] The check for missed claims: `finish_run` returns 409 and names the claims while there is a waiting claim the run took (a retry) or, under the cap, a waiting claim it has not taken. It returns 200 and stores the summary once nothing is owed, including when the cap is reached with claims left waiting. The run is then `finished`.
+- [x] The runner (stub queue agent): a run whose agent raises is marked `failed` with the reason and leaves no claim `in_progress`. A single-claim run follows the same failure rules (first failure: `waiting`; second: `needs_handler`).
+- [x] `npm run check:python` passes.
+- [x] Committed; this plan ticked and `docs/STATUS.md` updated.
 
 ## Phase 3: The claim helper
 

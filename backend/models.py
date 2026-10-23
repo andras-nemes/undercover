@@ -2,11 +2,13 @@
 
 from typing import Literal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 Status = Literal[
     "waiting", "in_progress", "awaiting_sign_off", "decided", "needs_handler"
 ]
+RunStatus = Literal["running", "finished", "failed"]
+TodoStatus = Literal["todo", "in_progress", "done", "left_for_handler"]
 DocumentName = Literal["wording", "manual"]
 Outcome = Literal["approve", "decline", "refer"]
 
@@ -167,3 +169,33 @@ class NewPayment(BaseModel):
 
 class NewSignOff(BaseModel):
     handler_id: str
+
+
+class Todo(BaseModel):
+    content: str
+    status: TodoStatus
+
+
+class Run(BaseModel):
+    run_id: int
+    started_at: str
+    limit: int
+    status: RunStatus
+    summary: str
+    todos: list[Todo]
+
+
+class NewRun(BaseModel):
+    limit: int = Field(ge=0)
+
+
+class NewTodos(BaseModel):
+    todos: list[Todo]
+
+
+class NewRelease(BaseModel):
+    reason: str
+
+
+class NewFinish(BaseModel):
+    summary: str

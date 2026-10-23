@@ -108,7 +108,7 @@ it("runs every waiting claim and keeps refreshing", async () => {
     await screen.findByRole("button", { name: "Run all waiting" }),
   );
   await waitFor(() => {
-    expect(mock).toHaveBeenCalledWith("/api/run-waiting", expect.anything());
+    expect(mock).toHaveBeenCalledWith("/api/runs", expect.anything());
   });
   current = current.map((c) => ({ ...c, status: "decided" as const }));
   await vi.advanceTimersByTimeAsync(2500);

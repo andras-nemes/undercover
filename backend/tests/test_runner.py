@@ -24,6 +24,10 @@ def stub_agent(monkeypatch, client):
     monkeypatch.setattr(runner, "run_agent", run)
 
 
+def broken(claim_id, thread_id):
+    raise RuntimeError("model unavailable")
+
+
 def test_run_agent_starts_the_claim_and_the_agent_decides(client, stub_agent):
     response = client.post("/api/claims/CLM-1001/run")
     assert response.status_code == 200
@@ -40,15 +44,21 @@ def test_a_claim_that_is_not_waiting_cannot_be_run(client, stub_agent):
 
 
 def test_a_failed_run_returns_the_claim_to_waiting(client, monkeypatch):
-    def broken(claim_id, thread_id):
-        raise RuntimeError("model unavailable")
-
     monkeypatch.setattr(runner, "run_agent", broken)
     client.post("/api/claims/CLM-1001/run")
     assert client.get("/api/claims/CLM-1001").json()["status"] == "waiting"
     events = client.get("/api/claims/CLM-1001/events").json()
     assert [e["kind"] for e in events] == ["error"]
     assert "model unavailable" in events[0]["text"]
+    assert "Back in the queue" in events[0]["text"]
+
+
+def test_a_claim_that_fails_twice_is_left_for_a_handler(client, monkeypatch):
+    monkeypatch.setattr(runner, "run_agent", broken)
+    client.post("/api/claims/CLM-1001/run")
+    client.post("/api/claims/CLM-1001/run")
+    assert client.get("/api/claims/CLM-1001").json()["status"] == "needs_handler"
+    assert client.post("/api/claims/CLM-1001/run").status_code == 409
 
 
 def test_an_unpaid_approval_goes_back_to_waiting(client, monkeypatch):
@@ -68,19 +78,41 @@ def test_an_unpaid_approval_goes_back_to_waiting(client, monkeypatch):
     claim = client.get("/api/claims/CLM-1001").json()
     assert claim["status"] == "waiting"
     assert claim["decision"]["payout"] == 50.0
+    events = client.get("/api/claims/CLM-1001/events").json()
+    assert "stopped before it finished" in events[0]["text"]
 
 
-def test_run_waiting_works_every_waiting_claim_in_turn(client, stub_agent):
-    client.post("/api/claims/CLM-1001/run")
-    response = client.post("/api/run-waiting")
-    assert len(response.json()) == 24
-    statuses = {c["status"] for c in client.get("/api/claims").json()}
-    assert statuses == {"decided"}
+def test_a_queue_run_that_raises_is_marked_failed(client, monkeypatch):
+    def broken_queue(run_id):
+        raise RuntimeError("provider down")
+
+    monkeypatch.setattr(runner, "run_queue", broken_queue)
+    client.post("/api/runs", json={"limit": 0})
+    run = client.get("/api/runs/latest").json()
+    assert run["status"] == "failed"
+    assert "provider down" in run["summary"]
 
 
-def test_run_waiting_skips_claims_that_are_no_longer_waiting(client, stub_agent):
-    client.post("/api/claims/CLM-1001/run")
-    runner.work_waiting(["CLM-1001", "CLM-1002"])
-    claim = client.get("/api/claims/CLM-1001/events").json()
-    assert [e["kind"] for e in claim].count("started") == 1
-    assert client.get("/api/claims/CLM-1002").json()["status"] == "decided"
+def test_a_queue_run_that_ends_without_finishing_is_marked_failed(client, monkeypatch):
+    monkeypatch.setattr(runner, "run_queue", lambda run_id: "Done.")
+    client.post("/api/runs", json={"limit": 0})
+    assert client.get("/api/runs/latest").json()["status"] == "failed"
+
+
+def test_a_queue_run_that_finishes_stays_finished(client, monkeypatch):
+    def works_one_claim(run_id):
+        client.post(f"/api/runs/{run_id}/claims/CLM-1001/start")
+        decision = {
+            "decision": "decline",
+            "payout": 0,
+            "reason": "Not covered.",
+            "policy_section": "Section 9",
+        }
+        client.post("/api/claims/CLM-1001/decision", json=decision)
+        client.post(f"/api/runs/{run_id}/finish", json={"summary": "One claim."})
+
+    monkeypatch.setattr(runner, "run_queue", works_one_claim)
+    client.post("/api/runs", json={"limit": 1})
+    run = client.get("/api/runs/latest").json()
+    assert run["status"] == "finished"
+    assert run["summary"] == "One claim."

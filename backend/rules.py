@@ -8,6 +8,8 @@ from fastapi import HTTPException
 from backend import claims
 from backend.models import Decision, Event, NewDecision, Payment, Status
 
+MAX_ATTEMPTS = 2
+
 
 def now() -> str:
     """The current time in UTC, to the second."""
@@ -40,6 +42,42 @@ def get_status(db: sqlite3.Connection, claim_id: str) -> Status:
     if row is None:
         raise claims.not_found("Claim", claim_id)
     return row["status"]
+
+
+def start_claim(db: sqlite3.Connection, claim_id: str) -> None:
+    """Move a waiting claim to in progress, or refuse with a 409."""
+    get_status(db, claim_id)
+    with db:
+        started = db.execute(
+            "UPDATE claims SET status = 'in_progress'"
+            " WHERE claim_id = ? AND status = 'waiting'",
+            (claim_id,),
+        ).rowcount
+    if not started:
+        raise conflict(f"Claim {claim_id} is not waiting")
+
+
+def release_claim(db: sqlite3.Connection, claim_id: str, reason: str) -> None:
+    """Settle a claim after an agent has worked on it.
+
+    A claim still in progress was not finished: the first time it goes back to
+    waiting, the second time it is left for a handler.
+    """
+    if get_status(db, claim_id) != "in_progress":
+        return
+    row = db.execute(
+        "SELECT failures FROM claims WHERE claim_id = ?", (claim_id,)
+    ).fetchone()
+    failures = row["failures"] + 1
+    left = failures >= MAX_ATTEMPTS
+    with db:
+        db.execute(
+            "UPDATE claims SET failures = ? WHERE claim_id = ?", (failures, claim_id)
+        )
+        set_status(db, claim_id, "needs_handler" if left else "waiting")
+    why = reason or "the agent stopped before it finished"
+    outcome = "Left for a handler." if left else "Back in the queue."
+    add_event(db, claim_id, "error", f"Attempt {failures} failed: {why}. {outcome}")
 
 
 def decide(db: sqlite3.Connection, claim_id: str, body: NewDecision) -> Decision:

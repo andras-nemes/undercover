@@ -28,7 +28,8 @@ CREATE TABLE claims (
     submitted_on TEXT NOT NULL, incident_date TEXT NOT NULL,
     incident_location TEXT NOT NULL, amount_claimed REAL NOT NULL,
     items TEXT NOT NULL, documents TEXT NOT NULL,
-    status TEXT NOT NULL DEFAULT 'waiting'
+    status TEXT NOT NULL DEFAULT 'waiting',
+    failures INTEGER NOT NULL DEFAULT 0
 );
 CREATE TABLE decisions (
     claim_id TEXT PRIMARY KEY, decision TEXT NOT NULL, payout REAL NOT NULL,
@@ -39,6 +40,18 @@ CREATE TABLE payments (
 );
 CREATE TABLE sign_offs (
     claim_id TEXT PRIMARY KEY, handler_id TEXT NOT NULL, signed_at TEXT NOT NULL
+);
+CREATE TABLE runs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT, started_at TEXT NOT NULL,
+    claim_limit INTEGER NOT NULL, status TEXT NOT NULL DEFAULT 'running',
+    summary TEXT NOT NULL DEFAULT ''
+);
+CREATE TABLE run_claims (
+    run_id INTEGER NOT NULL, claim_id TEXT NOT NULL, PRIMARY KEY (run_id, claim_id)
+);
+CREATE TABLE todos (
+    run_id INTEGER NOT NULL, position INTEGER NOT NULL, content TEXT NOT NULL,
+    status TEXT NOT NULL, PRIMARY KEY (run_id, position)
 );
 CREATE TABLE reads (
     claim_id TEXT NOT NULL, document TEXT NOT NULL, section INTEGER NOT NULL,

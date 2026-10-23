@@ -35,6 +35,14 @@ def list_summaries(db: sqlite3.Connection) -> list[ClaimSummary]:
     return [ClaimSummary(**row) for row in rows]
 
 
+def get_summary(db: sqlite3.Connection, claim_id: str) -> ClaimSummary:
+    """One claim's summary, or a 404."""
+    for summary in list_summaries(db):
+        if summary.claim_id == claim_id:
+            return summary
+    raise not_found("Claim", claim_id)
+
+
 def load_policy(db: sqlite3.Connection, policy_id: str) -> Policy:
     """A policy with the limits of its plan."""
     policy = json.loads(

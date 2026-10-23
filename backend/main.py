@@ -8,7 +8,7 @@ from typing import Annotated
 from fastapi import BackgroundTasks, Depends, FastAPI
 from fastapi.responses import PlainTextResponse
 
-from backend import claims, documents, rules, runner
+from backend import claims, documents, rules, runner, runs
 from backend.db import ROOT, get_db, init_db
 from backend.models import (
     ClaimDetail,
@@ -18,10 +18,15 @@ from backend.models import (
     Handler,
     NewDecision,
     NewEvent,
+    NewFinish,
     NewPayment,
     NewRead,
+    NewRelease,
+    NewRun,
     NewSignOff,
+    NewTodos,
     Payment,
+    Run,
     Section,
 )
 
@@ -124,15 +129,51 @@ def sign_off_claim(claim_id: str, body: NewSignOff, db: Db) -> ClaimDetail:
 @app.post("/api/claims/{claim_id}/run", operation_id="run_agent")
 def run_agent(claim_id: str, background: BackgroundTasks, db: Db) -> ClaimDetail:
     """Start the agent on a waiting claim."""
-    rules.get_status(db, claim_id)
-    runner.start(claim_id)
+    rules.start_claim(db, claim_id)
     background.add_task(runner.work, claim_id)
     return claims.get_detail(db, claim_id)
 
 
-@app.post("/api/run-waiting", operation_id="run_waiting_claims")
-def run_waiting_claims(background: BackgroundTasks, db: Db) -> list[ClaimSummary]:
-    """Start the agent on every waiting claim, one after another."""
-    waiting = [c for c in claims.list_summaries(db) if c.status == "waiting"]
-    background.add_task(runner.work_waiting, [c.claim_id for c in waiting])
-    return waiting
+@app.post("/api/claims/{claim_id}/release", operation_id="release_claim")
+def release_claim(claim_id: str, body: NewRelease, db: Db) -> ClaimSummary:
+    """Settle a claim after work on it: one still in progress failed."""
+    rules.release_claim(db, claim_id, body.reason)
+    return claims.get_summary(db, claim_id)
+
+
+@app.post("/api/runs", operation_id="start_run")
+def start_run(body: NewRun, background: BackgroundTasks, db: Db) -> Run:
+    """Start the queue agent on the waiting claims, with a cap (0 for none)."""
+    run = runs.start_run(db, body.limit)
+    background.add_task(runner.work_run, run.run_id)
+    return run
+
+
+@app.get("/api/runs/latest", operation_id="get_latest_run")
+def get_latest_run(db: Db) -> Run | None:
+    """Get the most recent run with its to-do list, or null."""
+    return runs.get_latest(db)
+
+
+@app.get("/api/runs/{run_id}/queue", operation_id="list_queue")
+def list_queue(run_id: int, db: Db) -> list[ClaimSummary]:
+    """List the waiting claims this run may still work."""
+    return runs.list_queue(db, run_id)
+
+
+@app.put("/api/runs/{run_id}/todos", operation_id="write_todos")
+def write_todos(run_id: int, body: NewTodos, db: Db) -> Run:
+    """Replace the to-do list of a run."""
+    return runs.write_todos(db, run_id, body.todos)
+
+
+@app.post("/api/runs/{run_id}/claims/{claim_id}/start", operation_id="start_claim")
+def start_claim(run_id: int, claim_id: str, db: Db) -> ClaimSummary:
+    """Start work on a waiting claim for a run, unless its cap is reached."""
+    return runs.start_claim(db, run_id, claim_id)
+
+
+@app.post("/api/runs/{run_id}/finish", operation_id="finish_run")
+def finish_run(run_id: int, body: NewFinish, db: Db) -> Run:
+    """Finish a run with a summary, unless it has missed a claim."""
+    return runs.finish_run(db, run_id, body.summary)

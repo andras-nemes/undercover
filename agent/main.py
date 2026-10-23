@@ -128,3 +128,8 @@ def run(claim_id: str, thread_id: str, llm: BaseChatModel | None = None) -> str:
                     if kind == "finished":
                         reply = text
     return reply
+
+
+def run_queue(run_id: int) -> str:
+    """Run the queue agent. Built in Phase 4 of docs/PLAN_HARNESS.md."""
+    raise NotImplementedError(run_id)
