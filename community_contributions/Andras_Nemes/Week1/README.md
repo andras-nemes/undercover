@@ -1,27 +1,17 @@
 # Andras Nemes: Week 1 contributions
 
-This folder holds my work for Week 1. There are two pieces.
+## 1. Week 1 Day 2 — cheapest model for the claims agent
 
-## 1. Week 1 Day 2 assignment: the cheapest model for the claims agent
-
-The assignment is the "Your assignment" cell near the end of `labs/week1day2.ipynb`: with a goal of at least 15 / 25 correct consistently, using the agent, what is the cheapest model you can find?
-
-**Solution:** [`week1day2_cheap_agent_models.ipynb`](week1day2_cheap_agent_models.ipynb), the only notebook in this folder.
-
-It plugs three candidates into the lab's own agent (same tools, same system prompt, only the model changes) and runs each over the whole 25-claim queue:
-
-| Model | Right / 25 | Cost (queue) | Time (queue) |
-|---|---|---|---|
-| `deepseek/deepseek-v4-flash-0731` (low) | 16 | $0.0097 | 206s |
-| `qwen/qwen3.7-flash` (low) | 18 | $0.0275 | 1374s |
-| `inclusionai/ling-3.0-flash` | 16 | $0.0061 | 389s |
-
-The lab's Luna agent run is the baseline: 17 / 25 for $0.0087 in 203s. Ling-3.0 Flash was the cheapest of the three I tested. These are single runs, not repeated, so they do not yet show the "consistently" part of the challenge. The notebook ends with a summary table and findings. The same summary is also at the end of my copy of `labs/week1day2.ipynb`.
+[`week1day2_cheap_agent_models.ipynb`](week1day2_cheap_agent_models.ipynb): three candidate models run against the lab's own agent over the 25-claim queue, compared on accuracy, cost and time. Findings also at the end of my copy of `labs/week1day2.ipynb`.
 
 ## 2. UnderCover pilot (Week 1 Day 3)
 
-The documents for the pilot build are in [`UnderCoverPOC_docs/`](UnderCoverPOC_docs/):
+[`UnderCoverPOC_docs/`](UnderCoverPOC_docs/): [`PILOT.md`](UnderCoverPOC_docs/PILOT.md) (write-up and UI screenshots), [`PLAN.md`](UnderCoverPOC_docs/PLAN.md), [`STATUS.md`](UnderCoverPOC_docs/STATUS.md).
 
-- [`PILOT.md`](UnderCoverPOC_docs/PILOT.md): what I did and my takeaways. **It includes screenshots of the pilot's UI in action**: the queue, the agent working on a claim, a decision with its reasons, an approval waiting for a handler's sign-off, the agent's instructions, and dark mode. The image files are in [`UnderCoverPOC_docs/images/`](UnderCoverPOC_docs/images/).
-- [`PLAN.md`](UnderCoverPOC_docs/PLAN.md): the plan for the pilot, with every success criterion ticked.
-- [`STATUS.md`](UnderCoverPOC_docs/STATUS.md): what is built and how to run it.
+## 3. UnderCover harness build (Week 1 Day 5)
+
+[`UnderCoverHARNESS_docs/`](UnderCoverHARNESS_docs/): [`HARNESS.md`](UnderCoverHARNESS_docs/HARNESS.md) (write-up and UI screenshots), [`PLAN.md`](UnderCoverHARNESS_docs/PLAN.md), [`STATUS.md`](UnderCoverHARNESS_docs/STATUS.md), and the other documents this build changed — [`SPEC.md`](UnderCoverHARNESS_docs/SPEC.md), [`TECH_STACK.md`](UnderCoverHARNESS_docs/TECH_STACK.md), [`CODE_STANDARDS.md`](UnderCoverHARNESS_docs/CODE_STANDARDS.md), [`PROCESS.md`](UnderCoverHARNESS_docs/PROCESS.md).
+
+## 4. Week 1 Day 5 Lab 1 assignment: a different model and a changed instruction
+
+[`week1day5_lab1_subagent_model_test.ipynb`](week1day5_lab1_subagent_model_test.ipynb): a self-contained rerun of the lab's claims desk with `claude-haiku-4-5` in place of `claude-sonnet-5-5`, plus an added instruction aimed at the baseline's one miss. The solution cell at the end explains a result that looks worse than it is: the added instruction left the model's actual decisions unchanged but made it less reliable about where and how it wrote its output.
