@@ -23,7 +23,7 @@ When asked to plan, as in "Please plan the pilot", write the plan to `docs/PLAN.
 When asked to implement the plan, as in "Please implement the plan for the pilot", build every phase in order without stopping. For each phase:
 
 1. Build it, with tests.
-2. Check every success criterion and fix whatever fails.
+2. Check every success criterion and fix whatever fails, and check the change against `docs/CODE_STANDARDS.md`: one module per external service, the harness kept separate from the domain, no module grown past where it should have split.
 3. Tick off its criteria in `docs/PLAN.md` and update `docs/STATUS.md`.
 4. Commit. The pre-commit hook runs the checks; if it fails, fix the problem and commit again.
 

@@ -1,25 +1,16 @@
-from contextlib import nullcontext
-
 import pytest
-from langchain_core.messages import AIMessage
 
 from agent import main
-from agent.tests.test_agent import StubModel, call, decide
+from agent.tests.stubs import approve_and_pay, script
 from backend import runner
 
 
 @pytest.fixture
-def stub_agent(monkeypatch, client):
+def stub_agent(monkeypatch, use_backend):
     """Make the runner's agent a stub that approves $420.00 and pays it."""
-    monkeypatch.setattr(main, "backend", lambda: nullcontext(client))
 
     def run(claim_id, thread_id):
-        replies = [
-            decide(claim_id, "approve", 420.0),
-            call("pay_claim", claim_id=claim_id, amount=420.0),
-            AIMessage(content="Paid."),
-        ]
-        return main.run(claim_id, thread_id, StubModel(messages=iter(replies)))
+        return main.run(claim_id, thread_id, script(*approve_and_pay()))
 
     monkeypatch.setattr(runner, "run_agent", run)
 

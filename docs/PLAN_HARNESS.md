@@ -158,18 +158,18 @@ Builds the agent that works one claim, with section lookup and recovery middlewa
 
 Success criteria
 
-- [ ] `uv run pytest -q` passes with at least 80% coverage; no test calls a model.
-- [ ] With a stub scripted to call `get_claim`, `list_sections`, `read_section` (manual section 9), `decide_claim` (approve $420.00) and `pay_claim`, `run("CLM-1001", ...)` leaves the claim `decided`, with the read recorded on the claim and the steps logged in order (the pilot's test, extended).
-- [ ] The helper never receives a whole document: no tool of the helper returns the full wording or manual (test on the tools' replies for a section read: the reply is shorter than the document and holds only that section).
-- [ ] The $1,250.00 payout is still refused with a 409 that comes back to the model as an error message; the claim is `awaiting_sign_off` and nothing is paid.
-- [ ] A stub that raises on its first model call leaves the claim `waiting` with an `error` event; run again it fails again and the claim is `needs_handler`.
-- [ ] A stub that finishes without deciding leaves the claim `waiting` (counted as a failure).
-- [ ] The system prompt is exactly what `GET /api/instructions/claim` returns (test).
-- [ ] `model()` returns `deepseek/deepseek-v4.1-flash` with low reasoning effort by default, and the value of `MODEL_NAME` (no reasoning effort) when it is set (test).
-- [ ] The model middleware is in place on the helper, and `ModelCallLimitMiddleware` with a stub that never stops ends the run with an error and a released claim (test).
-- [ ] `agent/` still imports nothing from `backend` outside tests and reads no file from `data/` (the pilot's test).
-- [ ] `npm run check:python` passes.
-- [ ] Committed; this plan ticked and `docs/STATUS.md` updated.
+- [x] `uv run pytest -q` passes with at least 80% coverage; no test calls a model.
+- [x] With a stub scripted to call `get_claim`, `list_sections`, `read_section` (manual section 9), `decide_claim` (approve $420.00) and `pay_claim`, `run("CLM-1001", ...)` leaves the claim `decided`, with the read recorded on the claim and the steps logged in order (the pilot's test, extended).
+- [x] The helper never receives a whole document: no tool of the helper returns the full wording or manual (test on the tools' replies for a section read: the reply is shorter than the document and holds only that section).
+- [x] The $1,250.00 payout is still refused with a 409 that comes back to the model as an error message; the claim is `awaiting_sign_off` and nothing is paid.
+- [x] A stub that raises on its first model call leaves the claim `waiting` with an `error` event; run again it fails again and the claim is `needs_handler`.
+- [x] A stub that finishes without deciding leaves the claim `waiting` (counted as a failure).
+- [x] The system prompt is exactly what `GET /api/instructions/claim` returns (test).
+- [x] `model()` returns `deepseek/deepseek-v4.1-flash` with low reasoning effort by default, and the value of `MODEL_NAME` (no reasoning effort) when it is set (test).
+- [x] The model middleware is in place on the helper, and `ModelCallLimitMiddleware` with a stub that never stops ends the run with an error and a released claim (test).
+- [x] `agent/` still imports nothing from `backend` outside tests and reads no file from `data/` (the pilot's test).
+- [x] `npm run check:python` passes.
+- [x] Committed; this plan ticked and `docs/STATUS.md` updated.
 
 ## Phase 4: The queue agent and the instructions
 
@@ -183,19 +183,19 @@ Builds the agent that runs the queue, and writes both sets of instructions. Why 
 
 Success criteria
 
-- [ ] `uv run pytest -q` passes with at least 80% coverage; no test calls a model.
-- [ ] With scripted stubs for the queue agent and for each helper, `run_queue` on a reseeded database works three claims: each ends `decided`, the to-do list ends with three `done` items, `finish_run` stores the summary, and the run is `finished`.
-- [ ] To-do list stored and shown: the list the stub queue agent writes is returned by `GET /api/runs/latest`, and it changes as the stub updates it between claims (a test reads it after each step).
-- [ ] The cap: a run with a limit of 2 and a stub that tries to work a third claim gets the 409 as an error message from `work_claim`, and 23 claims stay `waiting`.
-- [ ] A failed claim does not stop the run: with the first helper raising, the next claim is still worked and decided.
-- [ ] A failed claim is tried again: the helper for claim A raises once and then succeeds; A is `decided`, the run is `finished`, and A's events show the error and then the second attempt.
-- [ ] A claim that fails twice is left for a handler: both helpers for claim B raise; B is `needs_handler`, the to-do item can be `left_for_handler`, and the run still finishes.
-- [ ] The check for missed claims: a stub that calls `finish_run` while claims it may still take are waiting gets the 409 listing them as a tool error, works them and then finishes.
-- [ ] The queue agent's context stays small: the messages it sees contain the helpers' one-line replies and none of a claim's documents or sections (test on the stub's recorded inputs).
-- [ ] The queue agent's system prompt is exactly what `GET /api/instructions/queue` returns (test).
-- [ ] The instructions mention the manual and the wording by name and contain no reference to `evals` or to any handler's decision; the test that keeps `evals` out of the source covers the instruction files.
-- [ ] `npm run check:python` passes.
-- [ ] Committed; this plan ticked and `docs/STATUS.md` updated.
+- [x] `uv run pytest -q` passes with at least 80% coverage; no test calls a model.
+- [x] With scripted stubs for the queue agent and for each helper, `run_queue` on a reseeded database works three claims: each ends `decided`, the to-do list ends with three `done` items, `finish_run` stores the summary, and the run is `finished`.
+- [x] To-do list stored and shown: the list the stub queue agent writes is returned by `GET /api/runs/latest`, and it changes as the stub updates it between claims (a test reads it after each step).
+- [x] The cap: a run with a limit of 2 and a stub that tries to work a third claim gets the 409 as an error message from `work_claim`, and 23 claims stay `waiting`.
+- [x] A failed claim does not stop the run: with the first helper raising, the next claim is still worked and decided.
+- [x] A failed claim is tried again: the helper for claim A raises once and then succeeds; A is `decided`, the run is `finished`, and A's events show the error and then the second attempt.
+- [x] A claim that fails twice is left for a handler: both helpers for claim B raise; B is `needs_handler`, the to-do item can be `left_for_handler`, and the run still finishes.
+- [x] The check for missed claims: a stub that calls `finish_run` while claims it may still take are waiting gets the 409 listing them as a tool error, works them and then finishes.
+- [x] The queue agent's context stays small: the messages it sees contain the helpers' one-line replies and none of a claim's documents or sections (test on the stub's recorded inputs).
+- [x] The queue agent's system prompt is exactly what `GET /api/instructions/queue` returns (test).
+- [x] The instructions mention the manual and the wording by name and contain no reference to `evals` or to any handler's decision; the test that keeps `evals` out of the source covers the instruction files.
+- [x] `npm run check:python` passes.
+- [x] Committed; this plan ticked and `docs/STATUS.md` updated.
 
 ## Phase 5: Dashboard
 
