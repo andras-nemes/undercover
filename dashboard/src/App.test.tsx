@@ -19,13 +19,20 @@ const claims: ClaimSummary[] = [
 function stubFetch() {
   vi.stubGlobal(
     "fetch",
-    vi.fn((path: string) =>
-      Promise.resolve(
-        path === "/api/instructions/claim"
-          ? new Response("You are the agent.\n\n## Steps\n\n- one")
-          : Response.json(claims),
-      ),
-    ),
+    vi.fn((path: string) => {
+      if (path === "/api/instructions/queue") {
+        return Promise.resolve(new Response("You run the queue."));
+      }
+      if (path === "/api/instructions/claim") {
+        return Promise.resolve(
+          new Response("You are the agent.\n\n## Steps\n\n- one"),
+        );
+      }
+      if (path === "/api/runs/latest") {
+        return Promise.resolve(Response.json(null));
+      }
+      return Promise.resolve(Response.json(claims));
+    }),
   );
 }
 

@@ -1,6 +1,9 @@
 export type Status =
-  "waiting" | "in_progress" | "awaiting_sign_off" | "decided";
+  "waiting" | "in_progress" | "awaiting_sign_off" | "decided" | "needs_handler";
 export type Outcome = "approve" | "decline" | "refer";
+export type TodoStatus = "todo" | "in_progress" | "done" | "left_for_handler";
+export type RunStatus = "running" | "finished" | "failed";
+export type DocumentName = "wording" | "manual";
 
 export interface ClaimSummary {
   claim_id: string;
@@ -70,6 +73,26 @@ export interface Decision {
   policy_section: string;
 }
 
+export interface Read {
+  document: DocumentName;
+  section: number;
+  title: string;
+}
+
+export interface Todo {
+  content: string;
+  status: TodoStatus;
+}
+
+export interface Run {
+  run_id: number;
+  started_at: string;
+  limit: number;
+  status: RunStatus;
+  summary: string;
+  todos: Todo[];
+}
+
 export interface ClaimDetail {
   claim_id: string;
   claim_type: string;
@@ -95,6 +118,7 @@ export interface ClaimDetail {
     handler_name: string;
     signed_at: string;
   } | null;
+  reads: Read[];
 }
 
 export interface AgentEvent {

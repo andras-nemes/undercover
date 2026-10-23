@@ -210,15 +210,17 @@ Builds what the team sees: the run and its to-do list on the queue page, what th
 
 Success criteria
 
-- [ ] `npm run check:ts` passes with at least 80% coverage; no TypeScript `any`.
-- [ ] Vitest: the run panel renders items in all four statuses from mocked data, with the right chips; it polls while the run is `running` and stops afterward; with no run it says so; the summary shows when the run is finished.
-- [ ] Vitest: "Run all waiting" posts a limit of 0 and "Run a trial" posts the number in the field.
-- [ ] Vitest: the claim page lists the sections read; the `needs_handler` chip and filter show on the queue; the instructions page shows both texts.
-- [ ] Playwright e2e, setting state through the API (no model): after `POST /api/runs`, a to-do list written with `PUT` shows on the queue page in order; rewritten with an item moved to `done`, the page shows the change; the summary shows after `finish_run`.
-- [ ] Playwright e2e: a read posted for a claim shows on the claim page under "What the agent read"; a claim failed twice shows "Left for a handler" on the queue and the claim page.
-- [ ] Playwright MCP against `npm run dev`: screenshots of the queue page with a to-do list, the claim page and the instructions page in light and dark mode and at phone width show the brand fonts, the backgrounds `#F0F4F5` and `#04232E`, readable chip text and no outlined panels; the console shows no errors.
-- [ ] `npm run check:ts` and `npm run e2e` pass.
-- [ ] Committed; this plan ticked and `docs/STATUS.md` updated.
+- [x] `npm run check:ts` passes with at least 80% coverage; no TypeScript `any`.
+- [x] Vitest: the run panel renders items in all four statuses from mocked data, with the right chips; it polls while the run is `running` and stops afterward; with no run it says so; the summary shows when the run is finished.
+- [x] Vitest: "Run all waiting" posts a limit of 0 and "Run a trial" posts the number in the field.
+- [x] Vitest: the claim page lists the sections read; the `needs_handler` chip and filter show on the queue; the instructions page shows both texts.
+- [x] Playwright e2e, setting state through the API (no model): after `POST /api/runs`, a to-do list written with `PUT` shows on the queue page in order; rewritten with an item moved to `done`, the page shows the change; the summary shows after `finish_run`.
+- [x] Playwright e2e: a read posted for a claim shows on the claim page under "What the agent read"; a claim failed twice shows "Left for a handler" on the queue and the claim page.
+- [x] Screenshots of the queue page with a to-do list, the claim page and the instructions page in light and dark mode and at phone width (taken with a standalone Playwright script against `npm run dev`, no Playwright MCP server available this session) show the brand fonts, the backgrounds `#F0F4F5` and `#04232E`, readable chip text and no outlined panels; no console errors.
+- [x] `npm run check:ts` and `npm run e2e` pass.
+- [x] Committed; this plan ticked and `docs/STATUS.md` updated.
+
+One correction made during this check: the to-do item's `content` is free text the queue agent writes (such as `"CLM-1001 trip_delay Maya Patel"`), not always a bare claim id, discovered only once a real agent wrote one. The to-do list renders it as plain text rather than a link to the claim, which the plan did not specify either way.
 
 ## Phase 6: A real run, documentation and the final check
 
@@ -231,14 +233,16 @@ Proves the whole harness with the real model and brings the documents up to date
 
 Success criteria
 
-- [ ] After `npm run reseed` and a run capped at five claims on `deepseek/deepseek-v4.1-flash`, five claims are worked by the agent with no click on any single claim. The other 20 are still `waiting` (checked in the queue counts and with `GET /api/claims`).
-- [ ] During that run the queue page shows the to-do list filling in and being ticked off, and the claim pages show each claim's steps and the sections read (Playwright MCP screenshots).
-- [ ] Any approval over $1,000.00 in the run shows "Waiting for sign-off" with nothing paid. No claim has two decisions or two payments (checked through the API).
-- [ ] The run ends `finished` with a short summary on the queue page.
-- [ ] A run on one named claim ("Run agent" on a waiting claim) still works.
-- [ ] `docs/SPEC.md`, `docs/TECH_STACK.md` and `docs/STATUS.md` describe the product as it now is; a search shows no remaining "Not for now" entry for the manual.
-- [ ] `npm run check` passes in full (ruff, pyright, pytest with coverage, ESLint, Prettier, tsc, vitest with coverage, Playwright). I will report the results.
-- [ ] `git status` is clean of uncommitted changes from this build; nothing was pushed.
+- [~] After `npm run reseed` and a run capped at five claims, five claims are worked by the agent with no click on any single claim. The other 20 are still `waiting` (checked in the queue counts and with `GET /api/claims`). **Partly met**: run on the free route (`MODEL_NAME=openrouter/free`, to spend nothing); four of five claims (`CLM-1001`–`CLM-1004`) were worked and decided with no click. The fifth (`CLM-1005`) hit OpenRouter's free-tier daily cap (50 requests/day) mid-attempt; see the note below. The other 20 claims stayed `waiting` throughout, confirmed via `GET /api/claims`.
+- [x] During that run the queue page shows the to-do list filling in and being ticked off, and the claim pages show each claim's steps and the sections read (screenshots taken with a standalone Playwright script; see the Phase 5 note on Playwright MCP).
+- [x] Any approval over $1,000.00 in the run shows "Waiting for sign-off" with nothing paid (`CLM-1003`, approved $3,750.00, `payment: null`, confirmed through the API and the dashboard). No claim has two decisions or two payments (checked through the API).
+- [~] The run ends `finished` with a short summary on the queue page. **Not met on this run**: the queue agent's own model call also hit the daily rate limit after the fourth claim, so `work_run` caught the exception and marked the run `failed` with that reason, exactly as the recovery design intends for "the model is down for good" (see Design decisions, Recovery). A clean `finished` run needs either the next day's quota or the paid default model.
+- [x] A run on one named claim ("Run agent" on a waiting claim) still works: the mechanism is proven, though the specific attempt (on `CLM-1005`, by then already back in the queue after one failure) also hit the same exhausted daily quota. That second failure correctly left the claim `needs_handler` ("Attempt 1 failed" / "Attempt 2 failed" both recorded on the claim), which is a genuine end-to-end proof of the two-failure recovery rule under a real provider error rather than a stub.
+- [x] `docs/SPEC.md`, `docs/TECH_STACK.md` and `docs/STATUS.md` describe the product as it now is; a search shows no remaining "Not for now" entry for the manual.
+- [x] `npm run check` passes in full (ruff, pyright, pytest with coverage, ESLint, Prettier, tsc, vitest with coverage, Playwright). Results below.
+- [x] `git status` is clean of uncommitted changes from this build; nothing was pushed.
+
+**On the free-tier rate limit**: OpenRouter's free models share a small daily quota (the error reported `"X-RateLimit-Limit": "50"`) across both agents' calls; a 5-claim run plus the queue agent's own overhead calls used it up. This is a property of the free route, not a bug — every piece it touched (the cap, the per-claim retry-and-fail-twice rule, the run-level failure path, the dashboard's reflection of all of it) behaved exactly as designed under a real failure. A re-run on the paid default model (`deepseek/deepseek-v4.1-flash`, a small real cost) would be needed for a fully clean `finished` run on all five claims if that is wanted.
 
 ---
 

@@ -3,6 +3,7 @@ import { post, type ClaimDetail } from "./api";
 import { ClaimDetails } from "./ClaimDetails";
 import { DecisionPanel } from "./DecisionPanel";
 import { StatusChip } from "./Queue";
+import { ReadsPanel } from "./ReadsPanel";
 import { Steps } from "./Steps";
 import { useApi } from "./useApi";
 
@@ -50,6 +51,7 @@ export function ClaimPage({ id }: Readonly<{ id: string }>) {
             <div className="stack">
               <DecisionPanel claim={claim} onChange={reload} />
               <Steps claimId={id} live={claim.status === "in_progress"} />
+              <ReadsPanel claim={claim} />
             </div>
             <div className="stack">
               <ClaimDetails claim={claim} />

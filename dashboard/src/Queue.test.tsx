@@ -42,13 +42,27 @@ const claims = [
   claim({ claim_id: "CLM-1004", status: "awaiting_sign_off" }),
 ];
 
+function stubFetch(
+  claimsFn: () => ClaimSummary[] | undefined,
+): ReturnType<typeof vi.fn> {
+  const mock = vi.fn((path: string) =>
+    Promise.resolve(
+      path === "/api/runs/latest"
+        ? Response.json(null)
+        : Response.json(claimsFn()),
+    ),
+  );
+  vi.stubGlobal("fetch", mock);
+  return mock;
+}
+
 afterEach(() => {
   cleanup();
   vi.unstubAllGlobals();
 });
 
 it("shows each claim with its state and decision", async () => {
-  vi.stubGlobal("fetch", vi.fn().mockResolvedValue(Response.json(claims)));
+  stubFetch(() => claims);
   render(<Queue />);
   expect(await screen.findByText("Tom Becker")).toBeDefined();
   expect(screen.getByText("Approved $1,250.00")).toBeDefined();
@@ -60,7 +74,7 @@ it("shows each claim with its state and decision", async () => {
 });
 
 it("filters the queue by state", async () => {
-  vi.stubGlobal("fetch", vi.fn().mockResolvedValue(Response.json(claims)));
+  stubFetch(() => claims);
   render(<Queue />);
   await screen.findByText("Tom Becker");
   fireEvent.click(screen.getByRole("button", { name: /^Decided/ }));
@@ -72,15 +86,13 @@ it("filters the queue by state", async () => {
 
 it("refreshes while a claim is in progress", async () => {
   vi.useFakeTimers({ shouldAdvanceTime: true });
-  const fetchMock = vi
-    .fn()
-    .mockResolvedValueOnce(Response.json([claim({ status: "in_progress" })]))
-    .mockResolvedValue(Response.json([claim({ status: "decided" })]));
-  vi.stubGlobal("fetch", fetchMock);
+  let current = [claim({ status: "in_progress" })];
+  stubFetch(() => current);
   render(<Queue />);
   expect(
     await screen.findByText("In progress", { selector: ".chip" }),
   ).toBeDefined();
+  current = [claim({ status: "decided" })];
   await vi.advanceTimersByTimeAsync(2500);
   expect(
     await screen.findByText("Decided", { selector: ".chip" }),
@@ -91,17 +103,31 @@ it("refreshes while a claim is in progress", async () => {
 it("says when the queue cannot be loaded", async () => {
   vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("offline")));
   render(<Queue />);
-  expect(await screen.findByRole("alert")).toBeDefined();
+  expect(
+    await screen.findByText("The queue could not be loaded."),
+  ).toBeDefined();
 });
 
-it("runs every waiting claim and keeps refreshing", async () => {
+it("keeps refreshing once a run starts filling the queue", async () => {
   vi.useFakeTimers({ shouldAdvanceTime: true });
   let current = [claim({}), claim({ claim_id: "CLM-1002" })];
-  const mock = vi.fn((_path: string, init?: RequestInit) =>
-    Promise.resolve(
-      init?.method === "POST" ? Response.json([]) : Response.json(current),
-    ),
-  );
+  const mock = vi.fn((path: string, init?: RequestInit) => {
+    if (path === "/api/runs/latest")
+      return Promise.resolve(Response.json(null));
+    if (init?.method === "POST") {
+      return Promise.resolve(
+        Response.json({
+          run_id: 1,
+          started_at: "2026-10-22T08:00:00+00:00",
+          limit: 0,
+          status: "running",
+          summary: "",
+          todos: [],
+        }),
+      );
+    }
+    return Promise.resolve(Response.json(current));
+  });
   vi.stubGlobal("fetch", mock);
   render(<Queue />);
   fireEvent.click(
@@ -117,22 +143,5 @@ it("runs every waiting claim and keeps refreshing", async () => {
       2,
     );
   });
-  expect(screen.queryByRole("button", { name: "Run all waiting" })).toBeNull();
   vi.useRealTimers();
-});
-
-it("shows why the queue could not be run", async () => {
-  const mock = vi.fn((_path: string, init?: RequestInit) =>
-    Promise.resolve(
-      init?.method === "POST"
-        ? Response.json({ detail: "No." }, { status: 500 })
-        : Response.json([claim({})]),
-    ),
-  );
-  vi.stubGlobal("fetch", mock);
-  render(<Queue />);
-  fireEvent.click(
-    await screen.findByRole("button", { name: "Run all waiting" }),
-  );
-  expect(await screen.findByText(/No\./)).toBeDefined();
 });

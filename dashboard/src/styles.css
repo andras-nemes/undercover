@@ -251,6 +251,22 @@ tbody tr:hover {
   color: var(--midnight);
 }
 
+.chip-needs_handler,
+.chip-left_for_handler {
+  background: var(--raspberry);
+  color: #ffffff;
+}
+
+.chip-todo {
+  background: var(--marigold);
+  color: var(--midnight);
+}
+
+.chip-done {
+  background: var(--sea-green);
+  color: var(--midnight);
+}
+
 .prose {
   max-width: 760px;
 }
@@ -302,6 +318,40 @@ tbody tr:hover {
   font-size: 1.3rem;
   font-weight: 700;
   margin: 0 0 8px;
+}
+
+.run-panel {
+  margin-bottom: 16px;
+}
+
+.todos {
+  list-style: none;
+  margin: 0 0 16px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.todos li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--hover);
+  border-radius: 12px;
+  padding: 8px 12px;
+}
+
+.trial input {
+  font: inherit;
+  width: 56px;
+  color: var(--ink);
+  background: var(--panel);
+  border: 0;
+  border-radius: 8px;
+  padding: 6px 8px;
+  margin-left: 4px;
 }
 
 .sign-off {

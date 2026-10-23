@@ -71,6 +71,7 @@ function claim(overrides: Partial<ClaimDetail> = {}): ClaimDetail {
     decision: null,
     payment: null,
     sign_off: null,
+    reads: [],
     ...overrides,
   };
 }
@@ -289,6 +290,29 @@ it("polls the claim and its steps while the agent works, then stops", async () =
   const calls = mock.mock.calls.length;
   await vi.advanceTimersByTimeAsync(6000);
   expect(mock.mock.calls).toHaveLength(calls);
+});
+
+it("lists the sections the agent has read", async () => {
+  const detail = claim({
+    reads: [
+      { document: "manual", section: 9, title: "Repeat claims" },
+      { document: "wording", section: 3, title: "Trip Delay" },
+    ],
+  });
+  stubServer({ claim: detail, events: [] });
+  render(<ClaimPage id="CLM-1001" />);
+  expect(
+    await screen.findByText("Claims manual, 9. Repeat claims"),
+  ).toBeDefined();
+  expect(screen.getByText("Policy wording, 3. Trip Delay")).toBeDefined();
+});
+
+it("says when the agent has not read anything yet", async () => {
+  stubServer({ claim: claim(), events: [] });
+  render(<ClaimPage id="CLM-1001" />);
+  expect(
+    await screen.findByText("The agent has not read any sections yet."),
+  ).toBeDefined();
 });
 
 it("says when the claim cannot be loaded", async () => {

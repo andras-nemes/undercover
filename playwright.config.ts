@@ -1,9 +1,13 @@
+import { rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { defineConfig } from "@playwright/test";
 
 // The tests get their own backend on a fresh database and their own dashboard.
+// The OS can reuse a process id, so an old run's file at the same path must be
+// removed rather than reused, or its schema may be stale.
 const database = join(tmpdir(), `undercover-e2e-${process.pid.toString()}.db`);
+rmSync(database, { force: true });
 
 export default defineConfig({
   testDir: "e2e",
