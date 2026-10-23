@@ -242,7 +242,7 @@ Success criteria
 - [x] `npm run check` passes in full (ruff, pyright, pytest with coverage, ESLint, Prettier, tsc, vitest with coverage, Playwright). Results below.
 - [x] `git status` is clean of uncommitted changes from this build; nothing was pushed.
 
-**On the free-tier rate limit**: OpenRouter's free models share a small daily quota (the error reported `"X-RateLimit-Limit": "50"`) across both agents' calls; a 5-claim run plus the queue agent's own overhead calls used it up. This is a property of the free route, not a bug — every piece it touched (the cap, the per-claim retry-and-fail-twice rule, the run-level failure path, the dashboard's reflection of all of it) behaved exactly as designed under a real failure. A re-run on the paid default model (`deepseek/deepseek-v4.1-flash`, a small real cost) would be needed for a fully clean `finished` run on all five claims if that is wanted.
+**On the free-tier rate limit**: OpenRouter's free models share a small daily quota (the error reported `"X-RateLimit-Limit": "50"`) across both agents' calls; a 5-claim run plus the queue agent's own overhead calls used it up. This is a property of the free route, not a bug: every piece it touched (the cap, the per-claim retry-and-fail-twice rule, the run-level failure path, the dashboard's reflection of all of it) behaved exactly as designed under a real failure. A re-run on the paid default model (`deepseek/deepseek-v4.1-flash`, a small real cost) would be needed for a fully clean `finished` run on all five claims if that is wanted.
 
 ---
 

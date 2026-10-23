@@ -1,6 +1,6 @@
 # Andras Nemes: Week 1 contributions
 
-## 1. Week 1 Day 2 — cheapest model for the claims agent
+## 1. Week 1 Day 2: cheapest model for the claims agent
 
 [`week1day2_cheap_agent_models.ipynb`](week1day2_cheap_agent_models.ipynb): three candidate models run against the lab's own agent over the 25-claim queue, compared on accuracy, cost and time. Findings also at the end of my copy of `labs/week1day2.ipynb`.
 
@@ -10,7 +10,7 @@
 
 ## 3. UnderCover harness build (Week 1 Day 5)
 
-[`UnderCoverHARNESS_docs/`](UnderCoverHARNESS_docs/): [`HARNESS.md`](UnderCoverHARNESS_docs/HARNESS.md) (write-up and UI screenshots), [`PLAN.md`](UnderCoverHARNESS_docs/PLAN.md), [`STATUS.md`](UnderCoverHARNESS_docs/STATUS.md), and the other documents this build changed — [`SPEC.md`](UnderCoverHARNESS_docs/SPEC.md), [`TECH_STACK.md`](UnderCoverHARNESS_docs/TECH_STACK.md), [`CODE_STANDARDS.md`](UnderCoverHARNESS_docs/CODE_STANDARDS.md), [`PROCESS.md`](UnderCoverHARNESS_docs/PROCESS.md).
+[`UnderCoverHARNESS_docs/`](UnderCoverHARNESS_docs/): [`HARNESS.md`](UnderCoverHARNESS_docs/HARNESS.md) (write-up and UI screenshots), [`PLAN.md`](UnderCoverHARNESS_docs/PLAN.md), [`STATUS.md`](UnderCoverHARNESS_docs/STATUS.md), and the other documents this build changed: [`SPEC.md`](UnderCoverHARNESS_docs/SPEC.md), [`TECH_STACK.md`](UnderCoverHARNESS_docs/TECH_STACK.md), [`CODE_STANDARDS.md`](UnderCoverHARNESS_docs/CODE_STANDARDS.md), [`PROCESS.md`](UnderCoverHARNESS_docs/PROCESS.md).
 
 ## 4. Week 1 Day 5 Lab 1 assignment: a different model and a changed instruction
 
