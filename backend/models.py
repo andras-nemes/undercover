@@ -4,7 +4,10 @@ from typing import Literal
 
 from pydantic import BaseModel
 
-Status = Literal["waiting", "in_progress", "awaiting_sign_off", "decided"]
+Status = Literal[
+    "waiting", "in_progress", "awaiting_sign_off", "decided", "needs_handler"
+]
+DocumentName = Literal["wording", "manual"]
 Outcome = Literal["approve", "decline", "refer"]
 
 
@@ -104,6 +107,17 @@ class ClaimSummary(BaseModel):
     payout: float | None
 
 
+class Section(BaseModel):
+    number: int
+    title: str
+
+
+class Read(BaseModel):
+    document: DocumentName
+    section: int
+    title: str
+
+
 class ClaimDetail(BaseModel):
     claim_id: str
     claim_type: str
@@ -121,6 +135,7 @@ class ClaimDetail(BaseModel):
     decision: Decision | None
     payment: Payment | None
     sign_off: SignOff | None
+    reads: list[Read]
 
 
 class Event(BaseModel):
@@ -139,6 +154,11 @@ class NewDecision(BaseModel):
     payout: float
     reason: str
     policy_section: str
+
+
+class NewRead(BaseModel):
+    document: DocumentName
+    section: int
 
 
 class NewPayment(BaseModel):

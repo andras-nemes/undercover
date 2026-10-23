@@ -7,7 +7,7 @@ export function InstructionsPage() {
   const [failed, setFailed] = useState(false);
 
   useEffect(() => {
-    getText("/api/instructions")
+    getText("/api/instructions/claim")
       .then(setText)
       .catch(() => {
         setFailed(true);

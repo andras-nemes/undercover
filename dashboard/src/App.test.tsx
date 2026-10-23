@@ -21,7 +21,7 @@ function stubFetch() {
     "fetch",
     vi.fn((path: string) =>
       Promise.resolve(
-        path === "/api/instructions"
+        path === "/api/instructions/claim"
           ? new Response("You are the agent.\n\n## Steps\n\n- one")
           : Response.json(claims),
       ),

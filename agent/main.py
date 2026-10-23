@@ -43,9 +43,18 @@ def get_claim(claim_id: str) -> str:
 
 
 @tool
-def get_policy_wording() -> str:
-    """Get the policy wording, the contract with the customer."""
-    return call("GET", "/api/policy-wording")
+def list_sections(document: Literal["wording", "manual"]) -> str:
+    """List the numbered sections of the policy wording or the claims manual."""
+    return call("GET", f"/api/documents/{document}/sections")
+
+
+@tool
+def read_section(
+    claim_id: str, document: Literal["wording", "manual"], section: int
+) -> str:
+    """Read one numbered section of the policy wording or the claims manual."""
+    body = {"document": document, "section": section}
+    return call("POST", f"/api/claims/{claim_id}/reads", body)
 
 
 @tool
@@ -102,8 +111,8 @@ def run(claim_id: str, thread_id: str, llm: BaseChatModel | None = None) -> str:
 
     agent = create_agent(
         llm or model(),
-        tools=[get_claim, get_policy_wording, decide_claim, pay_claim],
-        system_prompt=call("GET", "/api/instructions"),
+        tools=[get_claim, list_sections, read_section, decide_claim, pay_claim],
+        system_prompt=call("GET", "/api/instructions/claim"),
     )
     log("started", f"Started on {claim_id}")
     reply = ""

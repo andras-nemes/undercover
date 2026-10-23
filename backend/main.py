@@ -8,8 +8,8 @@ from typing import Annotated
 from fastapi import BackgroundTasks, Depends, FastAPI
 from fastapi.responses import PlainTextResponse
 
-from backend import claims, rules, runner
-from backend.db import DATA, ROOT, get_db, init_db
+from backend import claims, documents, rules, runner
+from backend.db import ROOT, get_db, init_db
 from backend.models import (
     ClaimDetail,
     ClaimSummary,
@@ -19,8 +19,10 @@ from backend.models import (
     NewDecision,
     NewEvent,
     NewPayment,
+    NewRead,
     NewSignOff,
     Payment,
+    Section,
 )
 
 Db = Annotated[sqlite3.Connection, Depends(get_db)]
@@ -54,24 +56,32 @@ def get_claim(claim_id: str, db: Db) -> ClaimDetail:
     return claims.get_detail(db, claim_id)
 
 
-@app.get(
-    "/api/policy-wording",
-    operation_id="get_policy_wording",
+@app.get("/api/documents/{document}/sections", operation_id="list_sections")
+def list_sections(document: str) -> list[Section]:
+    """List the numbered sections of the policy wording or the claims manual."""
+    return documents.list_sections(document)
+
+
+@app.post(
+    "/api/claims/{claim_id}/reads",
+    operation_id="read_section",
     response_class=PlainTextResponse,
 )
-def get_policy_wording() -> str:
-    """Get the policy wording, the contract with the customer."""
-    return (DATA / "policy_wording.md").read_text(encoding="utf-8")
+def read_section(claim_id: str, body: NewRead, db: Db) -> str:
+    """Read one section of the wording or the manual, noted as read on the claim."""
+    return documents.read_section(db, claim_id, body.document, body.section)
 
 
 @app.get(
-    "/api/instructions",
+    "/api/instructions/{agent}",
     operation_id="get_instructions",
     response_class=PlainTextResponse,
 )
-def get_instructions() -> str:
-    """Get the instructions the UnderCover Agent follows."""
-    return (ROOT / "backend" / "instructions.md").read_text(encoding="utf-8")
+def get_instructions(agent: str) -> str:
+    """Get the instructions of the queue agent or the claim agent."""
+    if agent not in ("queue", "claim"):
+        raise claims.not_found("Instructions", agent)
+    return (ROOT / "backend" / f"instructions_{agent}.md").read_text(encoding="utf-8")
 
 
 @app.get("/api/handlers", operation_id="list_handlers")

@@ -14,6 +14,7 @@ from backend.models import (
     Payment,
     Plan,
     Policy,
+    Read,
     SignOff,
 )
 
@@ -98,6 +99,10 @@ def get_detail(db: sqlite3.Connection, claim_id: str) -> ClaimDetail:
         " JOIN handlers h ON h.handler_id = s.handler_id WHERE s.claim_id = ?",
         (claim_id,),
     ).fetchone()
+    reads = db.execute(
+        "SELECT document, section, title FROM reads WHERE claim_id = ? ORDER BY rowid",
+        (claim_id,),
+    ).fetchall()
     return ClaimDetail(
         **{
             **claim,
@@ -108,5 +113,6 @@ def get_detail(db: sqlite3.Connection, claim_id: str) -> ClaimDetail:
             "decision": Decision(**decision) if decision else None,
             "payment": Payment(**payment) if payment else None,
             "sign_off": SignOff(**sign_off) if sign_off else None,
+            "reads": [Read(**read) for read in reads],
         }
     )

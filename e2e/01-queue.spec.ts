@@ -13,7 +13,7 @@ test("the instructions page shows the agent instructions", async ({
   page,
   request,
 }) => {
-  const text = await (await request.get("/api/instructions")).text();
+  const text = await (await request.get("/api/instructions/claim")).text();
   const [firstLine = ""] = text.split("\n");
   await page.goto("/");
   await page.getByRole("link", { name: "Agent instructions" }).click();

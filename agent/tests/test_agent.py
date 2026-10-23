@@ -42,7 +42,10 @@ def use(monkeypatch, client):
 def test_tools_return_backend_replies_and_errors(monkeypatch, client):
     use(monkeypatch, client)
     assert "CLM-1001" in main.get_claim.invoke({"claim_id": "CLM-1001"})
-    assert "Policy Wording" in main.get_policy_wording.invoke({})
+    sections = main.list_sections.invoke({"document": "wording"})
+    assert "Trip Delay" in sections
+    read = {"claim_id": "CLM-1001", "document": "manual", "section": 9}
+    assert main.read_section.invoke(read).startswith("## 9. Repeat claims")
     missing = main.get_claim.invoke({"claim_id": "CLM-9999"})
     assert missing == "Error 404: Claim CLM-9999 not found"
 
@@ -54,7 +57,8 @@ def test_approve_and_pay(monkeypatch, client):
         "thread-1",
         script(
             call("get_claim", claim_id="CLM-1001"),
-            call("get_policy_wording"),
+            call("list_sections", document="wording"),
+            call("read_section", claim_id="CLM-1001", document="manual", section=9),
             decide("CLM-1001", "approve", 420.0),
             call("pay_claim", claim_id="CLM-1001", amount=420.0),
             AIMessage(content="Approved and paid."),
@@ -66,6 +70,7 @@ def test_approve_and_pay(monkeypatch, client):
     assert claim["decision"]["reason"] == "Covered by the wording."
     assert claim["decision"]["policy_section"] == "Section 3, Trip Delay"
     assert claim["payment"]["amount"] == 420.0
+    assert claim["reads"][0]["title"] == "Repeat claims"
 
 
 def test_payment_over_the_limit_comes_back_as_an_error(monkeypatch, client):
@@ -122,7 +127,7 @@ def test_system_prompt_is_the_backends_instructions(monkeypatch, client):
 
     monkeypatch.setattr(main, "create_agent", spy)
     main.run("CLM-1001", "thread-1", script(AIMessage(content="Done.")))
-    assert seen["system_prompt"] == client.get("/api/instructions").text
+    assert seen["system_prompt"] == client.get("/api/instructions/claim").text
 
 
 def test_agent_reaches_the_data_only_through_the_api():

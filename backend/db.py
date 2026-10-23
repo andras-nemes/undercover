@@ -40,6 +40,10 @@ CREATE TABLE payments (
 CREATE TABLE sign_offs (
     claim_id TEXT PRIMARY KEY, handler_id TEXT NOT NULL, signed_at TEXT NOT NULL
 );
+CREATE TABLE reads (
+    claim_id TEXT NOT NULL, document TEXT NOT NULL, section INTEGER NOT NULL,
+    title TEXT NOT NULL, PRIMARY KEY (claim_id, document, section)
+);
 CREATE TABLE events (
     id INTEGER PRIMARY KEY AUTOINCREMENT, claim_id TEXT NOT NULL,
     kind TEXT NOT NULL, text TEXT NOT NULL, created_at TEXT NOT NULL
@@ -54,8 +58,7 @@ def load(name: str) -> Any:
 
 def connect() -> sqlite3.Connection:
     """Open the database named by UNDERCOVER_DB, or the default one."""
-    path = Path(os.getenv("UNDERCOVER_DB", DEFAULT_DB))
-    db = sqlite3.connect(path, check_same_thread=False)
+    db = sqlite3.connect(database_path(), check_same_thread=False)
     db.row_factory = sqlite3.Row
     return db
 
@@ -67,6 +70,16 @@ def get_db() -> Iterator[sqlite3.Connection]:
         yield db
     finally:
         db.close()
+
+
+def database_path() -> Path:
+    """The file the database lives in."""
+    return Path(os.getenv("UNDERCOVER_DB", DEFAULT_DB))
+
+
+def reset_db() -> None:
+    """Delete the database. The next start creates it again and seeds it."""
+    database_path().unlink(missing_ok=True)
 
 
 def init_db() -> None:
@@ -132,3 +145,7 @@ def seed(db: sqlite3.Connection) -> None:
             for c in load("claims.json")
         ],
     )
+
+
+if __name__ == "__main__":
+    reset_db()

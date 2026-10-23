@@ -27,3 +27,7 @@ A live run on three claims worked end to end: a trip delay approved and paid, a 
 ## Not built
 
 The claims manual, sign-in, real payments, messages to customers, and any scoring of the agent against the handlers' decisions (`data/evals/` has not been opened).
+
+## Harness build (`docs/PLAN_HARNESS.md`), in progress
+
+- Phase 1 done: `GET /api/documents/{document}/sections` and `POST /api/claims/{id}/reads` let the agent read the wording and the claims manual one numbered section at a time; each read is recorded on the claim (`reads` in the claim detail). The agent's instructions are now `backend/instructions_queue.md` and `backend/instructions_claim.md`, served at `GET /api/instructions/{agent}`. `get_policy_wording` is gone. `npm run reseed` deletes the database; the next start rebuilds and reseeds it (an existing database has the old schema and must be reseeded).

@@ -3,7 +3,7 @@ from pathlib import Path
 
 from fastapi.testclient import TestClient
 
-from backend.db import DATA, init_db
+from backend.db import init_db, reset_db
 from backend.main import app
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -69,13 +69,62 @@ def test_get_claim_not_found(client):
     assert client.get("/api/claims/CLM-9999").status_code == 404
 
 
-def test_policy_wording_and_instructions(client):
-    wording = client.get("/api/policy-wording")
-    assert wording.text == (DATA / "policy_wording.md").read_text(encoding="utf-8")
-    instructions = client.get("/api/instructions")
-    assert instructions.text == (ROOT / "backend/instructions.md").read_text(
-        encoding="utf-8"
-    )
+def test_instructions_for_each_agent(client):
+    for agent in ("queue", "claim"):
+        text = (ROOT / f"backend/instructions_{agent}.md").read_text(encoding="utf-8")
+        assert client.get(f"/api/instructions/{agent}").text == text
+    assert client.get("/api/instructions/other").status_code == 404
+
+
+def test_sections_of_each_document(client):
+    wording = client.get("/api/documents/wording/sections").json()
+    assert len(wording) == 12
+    assert wording[2] == {"number": 3, "title": "Trip Delay"}
+    manual = client.get("/api/documents/manual/sections").json()
+    assert len(manual) == 14
+    assert manual[8] == {"number": 9, "title": "Repeat claims"}
+    assert client.get("/api/documents/letters/sections").status_code == 404
+
+
+def read(client, claim_id, document, section):
+    body = {"document": document, "section": section}
+    return client.post(f"/api/claims/{claim_id}/reads", json=body)
+
+
+def test_read_section_returns_only_that_section(client):
+    text = read(client, "CLM-1001", "manual", 9).text
+    assert text.startswith("## 9. Repeat claims")
+    assert "third claim" in text
+    assert "## 8." not in text
+    assert "## 10." not in text
+    assert read(client, "CLM-1001", "wording", 12).text.startswith("## 12.")
+
+
+def test_read_section_not_found(client):
+    assert read(client, "CLM-1001", "manual", 99).status_code == 404
+    assert read(client, "CLM-9999", "manual", 9).status_code == 404
+    assert read(client, "CLM-1001", "letters", 9).status_code == 422
+
+
+def test_reads_are_recorded_once_in_order(client):
+    read(client, "CLM-1001", "wording", 3)
+    read(client, "CLM-1001", "manual", 9)
+    read(client, "CLM-1001", "wording", 3)
+    reads = client.get("/api/claims/CLM-1001").json()["reads"]
+    assert reads == [
+        {"document": "wording", "section": 3, "title": "Trip Delay"},
+        {"document": "manual", "section": 9, "title": "Repeat claims"},
+    ]
+    assert client.get("/api/claims/CLM-1002").json()["reads"] == []
+
+
+def test_reset_removes_the_database(client, tmp_path):
+    path = tmp_path / "test.db"
+    assert path.exists()
+    reset_db()
+    assert not path.exists()
+    init_db()
+    assert count(path, "claims") == 25
 
 
 def test_list_handlers(client):
@@ -107,4 +156,6 @@ def test_sources_never_mention_the_answer_key():
         for source in (ROOT / folder).rglob("*.py"):
             if "tests" not in source.parts:
                 assert needle not in source.read_text(encoding="utf-8"), source
-    assert needle not in (ROOT / "backend/instructions.md").read_text(encoding="utf-8")
+    for agent in ("queue", "claim"):
+        instructions = ROOT / f"backend/instructions_{agent}.md"
+        assert needle not in instructions.read_text(encoding="utf-8")
